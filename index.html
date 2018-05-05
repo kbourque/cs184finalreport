@@ -31,12 +31,18 @@
 
     h3 {
         text-transform: uppercase;
-        font-size: 18px;
+        font-size: 20px;
         padding-top: 20px;
     }
 
+    h4 {
+        font-size: 18px;
+    }
+
     figcaption {
+        padding-top: 10px;
         font-weight: 200;
+        font-size: 16px;
     }
 
 </style>
@@ -94,16 +100,20 @@
                 we would update our velocity with changed positions and apply vorticity and viscosity for the next iteration.
             </p>
 
-            <h4>Finding neighbors</h4>
 
             <div>
-                Many of the next sections calculate position and velocity of a PointMass (particle) based on different aspects of their neighbors. 
-                We found that the optimal number of neighbors for each particle turned out to be around 20-30.
-                
-                To assign point mass neighbors, we created used a map; the keys were a spatial hash of the point masses based on their x, y and z positions, 
-                and the values were a list of PointMasses that mapped to the same hash. The purpose of this was to divide the volume into sectors and map PointMasses 
-                to sectors so that we didn’t have to consider every particle when checking for neighbors, but only the particles in the same sector.  
-                Each PointMass struct contains a <span class="code">std::vector<PointMass*></span> neighbors that is updated every time step.
+                <h4>Finding neighbors</h4>
+                <p>
+                        Many of the next sections calculate position and velocity of a PointMass (particle) based on different aspects of their neighbors. 
+                        We found that the optimal number of neighbors for each particle turned out to be around 20-30.
+                </p>
+
+                <p>
+                        To assign point mass neighbors, we created used a map; the keys were a spatial hash of the point masses based on their x, y and z positions, 
+                        and the values were a list of PointMasses that mapped to the same hash. The purpose of this was to divide the volume into sectors and map PointMasses 
+                        to sectors so that we didn’t have to consider every particle when checking for neighbors, but only the particles in the same sector.  
+                        Each PointMass struct contains a <span class="code">std::vector<PointMass*></span> neighbors that is updated every time step.
+                </p>
 
                 <div align="center">
                     <table style="width=90%; margin-top: 30px; margin-bottom: 30px;">
@@ -118,6 +128,109 @@
                     </table>
                 </div>
                 
+            </div>
+
+            <div>
+                    <h4>Detecting Collisions</h4> 
+                    <p>
+                        We added collision detection before setting the finalized positions of particles at the end of each step to ensure that no particles traveled through any objects in the scene, 
+                        like planes or spheres.  To implement collisions we corrected the predicted position so that if a particle wouldn’t go past the bounds of the collision object plus a constant 
+                        <span class="code">SURFACE_OFFSET</span> (this is so the points lay just beside the object and not directly on it to prevent any rendering ambiguity).  
+                    </p>                  
+            </div>
+
+            <div>
+                <h4>Enforcing Incompressibility</h4>
+                <p>
+                        The goal of each simulation step is to predict each particle’s new position based on external forces and density constraints.  
+                        The density constraints (there is one non-linear constraint per particle) are solved for over several iterations with Newton’s method.  
+                        Once the density constraints, indicated by <span class="code">lambda</span>, are finalized for each particle, they are applied to the calculation of the predicted position.  
+                </p>
+                <div align="center">
+                        <table style="width=90%; margin-top: 30px; margin-bottom: 30px;">
+                            <tr>
+                                <td align="middle">
+                                    <img src="img/lambda.png" width="60%" />
+                                    <figcaption align="middle">
+                                      Lambda
+                                    </figcaption>
+                                </td>
+                            </tr>
+                        </table>
+                </div>
+            </div>
+
+            <div>
+                <h4>Adding Tensile Instability</h4>
+                <p>
+                        One problem mentioned in Macklin’s paper that SPH simulations suffer from is clumping from when a neighbor doesn’t have enough neighbors can’t satisfy the rest density.  
+                        To combat this we followed the approach in the paper of adding an artificial pressure term, which we call s_corr.  
+                        This term is included in the calculation of delta_p, the new position and imitates the effects of surface tension by making particles draw their neighbors towards them.
+                </p>
+                <div align="center">
+                        <table style="width=90%; margin-top: 30px; margin-bottom: 30px;">
+                            <tr>
+                                <td align="middle">
+                                    <img src="img/posupdate.png" width="40%" />
+                                    <figcaption align="middle">
+                                      Position update including lambda and artificial pressure
+                                    </figcaption>
+                                </td>
+                            </tr>
+                            <tr>
+                                    <td align="middle">
+                                        <img src="img/correctiveforce.png" width="60%" />
+                                        <figcaption align="middle">
+                                          <span class="code">s_corr</span>
+                                        </figcaption>
+                                    </td>
+                                </tr>
+                        </table>
+                </div>
+            </div>
+
+            <div>
+                    <h4>Vorticity Confinement</h4>
+
+                    <p>
+                            To address the issue of dampening and lost energy from SPH methods of fluid simulation, 
+                            we calculate the vorticity of each particle’s location and a corrective force based on that vorticity. 
+                    </p>
+
+                    <div align="center">
+                            <table style="width=90%; margin-top: 30px; margin-bottom: 30px;">
+                                <tr>
+                                    <td align="middle">
+                                        <img src="img/vorticity.png" width="40%" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                        <td align="middle">
+                                            <img src="img/fvorticity.png" width="40%" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                            <td align="middle">
+                                                <img src="img/n.png" width="40%" />
+                                            </td>
+                                        </tr>
+                            </table>
+                    </div>
+
+                    <p>
+                            We also added viscosity in order to simulate a thicker consistency. We followed the approach in the PBD paper for both of these. 
+                            We chose a value of 0.01 for <span class="code">c</span> in the end.
+                    </p>
+
+                    <div align="center">
+                            <table style="width=90%; margin-top: 30px; margin-bottom: 30px;">
+                                <tr>
+                                    <td align="middle">
+                                        <img src="img/viscosity.png" width="60%" />
+                                    </td>
+                                </tr>
+                            </table>
+                    </div>
             </div>
         </div>
     </div>
