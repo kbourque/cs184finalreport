@@ -119,6 +119,88 @@
                 </div>
                 
             </div>
+
+            <h4>Modifications to Cloth Simulator Code</h4>
+            <div>
+                Aside from understanding and implementing the particle position updates explained in the paper, our other technical challenges included improving demoability, changing particles from points to spheres, and implementing particle stacking.
+            </div>
+
+            <h4>Improving Demoability</h4>
+            <div>
+                Although the cloth simulator also used a system of particles to emulate a physical system, it had many superfluous fields and methods that we didn’t need for simulating fluids, like the notion of “pinned” and the system of springs among other things.  There were also elements we wanted to add to enhance the demo and allow it to better showcase the properties of fluids.  
+
+                It wasn’t particularly interesting to watch a single layer of particles fall onto a single plane.  So to improve scope of our demo, we modified the scene-building code to allow for cubes of water to be initialized in a location of our choice.  This increased the flexibility of our demos because we could build one or multiple volumes of water with the dimensions of our choice.  Then, since fluids are special in that they will fill up the volume available to them, we modified our the JSON for our demo scenes to include a box so we could showcase that particular property of fluids.  To do this we needed to fully understand our coordinate system and know what relative planes to define in order to create a cube in the space. 
+            </div>
+            <div align="center">
+                <table style="width=90%; margin-top: 30px; margin-bottom: 30px;">
+                    <tr>
+                        <td align="middle">
+                            <img src="img/multiple_waters.png" width="60%" />
+                            <figcaption align="middle">
+                              Demo fluid volumes
+                            </figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div> 
+            <div>
+                Finally, to make the particles more visually pleasing and water-like we changed the color of each point mass being rendered, and also varied the color depending on the position of each particle.  
+            </div>
+
+            <h4>Parameter Tuning</h4>
+            <div>
+                Many of the problems we dealt with had to do with poorly chosen parameters. These parameters included mass of the particles, kernel radius (h), neighbor radius, and the pressure scalar (k). We conducted many different informal empirical tests to determine the correct choices for a lot of these, but luckily also found some parameters that Miles Macklin recommended himself. The change in parameters was pretty significant -- they solved problems such as particles just never falling down or repelling each other too much.
+            </div>
+            <div align="center">
+                <table style="width=90%; margin-top: 30px; margin-bottom: 30px;">
+                    <tr>
+                        <td align="middle">
+                            <iframe src="https://drive.google.com/file/d/1rF-1m1ist81nIFWqqrUpmX9gA14nwdye/preview" width="640" height="480"></iframe>
+                            <figcaption align="middle">
+                              Mass = 100
+                            </figcaption>
+                        </td>
+                        <td align="middle">
+                            <iframe src="https://drive.google.com/file/d/1QuU_y7bvT2drdjQAgZwgqqHKGs50HueQ/preview" width="640" height="480"></iframe>
+                            <figcaption align="middle">
+                              Mass = 1
+                            </figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="middle">
+                            <iframe src="https://drive.google.com/file/d/1frDzBYtine4acAg44pgFwkvoPJj0YGFS/preview" width="640" height="480"></iframe>
+                            <figcaption align="middle">
+                              Original parameters
+                            </figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="middle">
+                            <iframe src="https://drive.google.com/file/d/184dxYJYrvlNpV2jJXshYoyZn0zU2CkoV/preview" width="640" height="480"></iframe>
+                            <figcaption align="middle">
+                              Neighbor Radius = 0.01
+                            </figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="middle">
+                            <iframe src="https://drive.google.com/file/d/1PJhBrdzA9yD7rXVXsqm-NLFnu0tUlg2Z/preview" width="640" height="480"></iframe>
+                            <figcaption align="middle">
+                              K = 0.1
+                            </figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="middle">
+                            <iframe src="https://drive.google.com/file/d/1odkVrAJxygosqb7lXMV5vs3830RuQkN4/preview" width="640" height="480"></iframe>
+                            <figcaption align="middle">
+                              H = 0.5
+                            </figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div> 
         </div>
     </div>
 
