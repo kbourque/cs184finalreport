@@ -323,6 +323,53 @@
                 At this point, another team member tried using the drawSphere function in the cloth simulation code itself, and that worked! Always nice to have multiple brains working on the job. <br><br>
 
             </div>
+            <h4>Stacking</h4>
+            <div>
+                Our initial understanding was that solving the density constraints for all the particles would take care of keeping the particles from overlapping with each other. We wanted particles to stack, as fluid does when you pour it in a container. Unfortunately, we weren’t able to debug that issue just by examining our implementation of the equations, so we took matters into our own hands! <br><br>
+
+                We first tried to add a step after we calculate the predicted positions where we would loop through each particle’s neighbors and adjust their positions if they were touching or overlapping. We would move each particle involved by ½ the amount needed to separate the particles. However, after implementing this we realized that this was not quite right, as it’s likely that a particle is surrounded by more than one of its neighbors. In this case, if we corrected the position so that it was separated from one of its neighbors, we would likely be overlapping with the neighbor on the other side. Multiple corrections would just leave a particle overlapping one of its neighbors. <br><br>
+
+                In the images below, the particle in blue represents the particle that we are currently trying to separate from its neighbors.<br><br>
+
+
+                We realized that we would have to work in an ordered manner (dynamic programming!) in order to actually separate the particles and not just move them back-and-forth.
+
+            </div>
+            <div align="center">
+                <table style="width=90%; margin-top: 30px; margin-bottom: 30px;">
+                    <tr>
+                        <td align="middle">
+                            <img src="img/stacking_naive.png" width="60%" />
+                            <figcaption align="middle">
+                              Naive Stacking Algorithm
+                            </figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div>
+                This new method involved considering the particles in a bottom up manner. We would add all the particles to a priority queue and removing the particles one at a time until the priority queue was empty. For each removed particle, we would increase the y-position (which in our setting was height) of any colliding neighbors (that haven’t already been visited) by the diameter of the particles. This would essentially create particle layers. <br><br>
+
+                However, this algorithm doesn’t work perfectly. In theory, as the diagrams below show, we could have a final result with some particles “floating”. However, we decided that as a prototype this was close enough. We wanted to start off by just separating the particles; after, we would iterate. To avoid this, we could have used the same dynamic programming technique but apply it laterally as well (so not only do we order by top/down but also a left/right direction) using the x or z dimensions.<br><br>
+
+                As before, in the images below, the particle in blue represents the particle that we are currently trying to separate from its neighbors.
+            </div>
+            <div align="center">
+                <table style="width=90%; margin-top: 30px; margin-bottom: 30px;">
+                    <tr>
+                        <td align="middle">
+                            <img src="img/stacking_demo.png" width="60%" />
+                            <figcaption align="middle">
+                              DP Stacking Algorithm
+                            </figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div>
+                Unfortunately, though we did implement this algorithm, we were unable to see any results. We tried playing around with different data structures, refactoring the code, making changes such as using pointers instead of references, etc. but didn’t get anywhere. We reached a point where we were unable to proceed debugging.
+            </div>
+
         </div>
 
         <div>
@@ -402,7 +449,10 @@
 After running our simulation many, many times, it was quite clear that it worked much faster for a smaller number of particles, but we decided we needed to figure out exactly how much. We started with a 5 x 5 x 5 particle cube and made our way up to a 20 x 20 x 20 particle cube, increasing each dimension by 1 unit at a time. Our results are represented in the graph and table below:<br><br>
 
 <img src = "img/complexityGraph.png" width = "40%"> 
-<img src = "img/complexityTable.png" width = "40%">
+<img src = "img/complexityTable.png" width = "20%">
+<br>
+
+Average Time refers to the average of 20 calls to drawContents() which is called each time “next” is pressed. <br>
 
     </div>
 
