@@ -238,7 +238,7 @@
 
             <h4>Improving Demoability</h4>
             <div>
-                Although the cloth simulator also used a system of particles to emulate a physical system, it had many superfluous fields and methods that we didn’t need for simulating fluids, like the notion of “pinned” and the system of springs among other things.  There were also elements we wanted to add to enhance the demo and allow it to better showcase the properties of fluids.  
+                Although the cloth simulator also used a system of particles to emulate a physical system, it had many superfluous fields and methods that we didn’t need for simulating fluids, like the notion of “pinned” and the system of springs among other things.  There were also elements we wanted to add to enhance the demo and allow it to better showcase the properties of fluids.  <br><br>
 
                 It wasn’t particularly interesting to watch a single layer of particles fall onto a single plane.  So to improve scope of our demo, we modified the scene-building code to allow for cubes of water to be initialized in a location of our choice.  This increased the flexibility of our demos because we could build one or multiple volumes of water with the dimensions of our choice.  Then, since fluids are special in that they will fill up the volume available to them, we modified our the JSON for our demo scenes to include a box so we could showcase that particular property of fluids.  To do this we needed to fully understand our coordinate system and know what relative planes to define in order to create a cube in the space. 
             </div>
@@ -312,8 +312,20 @@
                     </tr>
                 </table>
             </div>
+            <h4>Changing Particles from Points to Spheres</h4>
+            <div>
+                What we thought would be a simple task was actually quite frustratingly not as straightforward. We initially tried to continue to use GL_POINTS by enabling smoothing using the command “glEnable(GL_POINT_SMOOTH);” and enable blending, but we were unable to compile because the identifier “GL_POINT_SMOOTH” couldn’t be found. The same thing happened when we tried to use point sprites which would allow us to apply spherical textures on the points. <br><br>
+
+                Through some fun Googling we learned that different versions of OpenGL on different hardware support different functions. <br><br>
+
+                We then tried to use GLUT/GLU libraries’ draw sphere functions. Adding this library gave us the opportunity to understand Cmake better as we had to figure out how to add the library and link them to our executable. Unfortunately, using the function “glutSolidSphere(GLdouble radius, GLint slices, GLint stacks);” let to an error we were unable to debug “Error 00000502 after convex fill”.  <br><br>
+
+                At this point, another team member tried using the drawSphere function in the cloth simulation code itself, and that worked! Always nice to have multiple brains working on the job. <br><br>
+
+            </div>
         </div>
     </div>
+
 
     <div>
         <h2>Results</h2>
